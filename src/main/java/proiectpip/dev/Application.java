@@ -1,0 +1,48 @@
+package proiectpip.dev;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Application {
+
+    private static final String API_KEY = System.getenv("DEEPSEEK_API_KEY");
+    private static final String BASE_URL = "https://api.deepseek.com/v1";
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        var body = """
+        {
+            "model": "deepseek-reasoner",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "How many r's are in the word Strawberry"
+                }
+            ]
+        }""";
+
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/chat/completions"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + API_KEY)
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+
+        var client = HttpClient.newHttpClient();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        var responseBody = response.body();
+        System.out.println(responseBody);
+
+        if (!responseBody.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            Object json = mapper.readValue(responseBody, Object.class);
+            String prettyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+            System.out.println(prettyJson);
+        }
+
+    }
+}
