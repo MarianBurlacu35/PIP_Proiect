@@ -1,0 +1,21 @@
+INDEX VERSION 1.131+C:\Users\student\Desktop\1301A PIP-proiect\.metadata\.plugins\org.eclipse.jdt.core
+1563365164.index
+3446968888.index
+1171631726.index
+459060657.index
+3337701295.index
+773993094.index
+756877186.index
+223658239.index
+1361490343.index
+3213249218.index
+583149244.index
+1865797976.index
+30042010.index
+45360071.index
+3931680777.index
+1275487861.index
+191081402.index
+2523459703.index
+3746139965.index
+3957365267.index
