@@ -23,5 +23,14 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/cmu_time_awb.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/cmu_us_kal.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/cmudict04.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/cmulex.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/cmutimelex.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/en_us.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/freetts.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/freetts-jsapi10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/marian/Desktop/pip git/lib/mbrola.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
