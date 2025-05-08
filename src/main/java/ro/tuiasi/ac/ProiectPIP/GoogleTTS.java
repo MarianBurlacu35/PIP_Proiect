@@ -240,9 +240,11 @@ public class GoogleTTS {
         }
     }
 
-    private String cleanText(String text) {
+    protected String cleanText(String text) {
+        if (text == null) return "";
         text = text.replaceAll("\\*\\*(.*?)\\*\\*", "$1");
-        text = text.replaceAll("###.*?###", " ");
+        text = text.replaceAll("###.*?###\\s*", "");  
         return text;
     }
+
 }
