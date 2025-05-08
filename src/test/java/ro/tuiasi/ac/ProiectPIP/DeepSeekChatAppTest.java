@@ -1,59 +1,147 @@
 package ro.tuiasi.ac.ProiectPIP;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
+import java.util.Scanner;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class DeepSeekChatAppTest {
 
+    private final PrintStream originalOut = System.out;
+    private final PrintStream originalErr = System.err;
+    private ByteArrayOutputStream consoleOutput;
+
+    @BeforeEach
+    public void setupConsoleCapture() {
+        consoleOutput = new ByteArrayOutputStream();
+        PrintStream combinedStream = new PrintStream(consoleOutput);
+        System.setOut(combinedStream);
+        System.setErr(combinedStream); 
+    }
+
+    @AfterEach
+    public void restoreConsole() {
+        System.setOut(originalOut);
+        System.setErr(originalErr);
+    }
+
+    // === cleanTextForSpeech() ===
+
     @Test
-    public void testNullInputReturnsEmptyString() {
-        String result = DeepSeekChatApp.cleanTextForSpeech(null);
-        assertEquals("", result, "Inputul null ar trebui sa returneze sirul gol.");
+    public void testCleanTextHandlesNull() {
+        assertEquals("", DeepSeekChatApp.cleanTextForSpeech(null));
     }
 
     @Test
-    public void testEmptyStringReturnsEmptyString() {
-        String result = DeepSeekChatApp.cleanTextForSpeech("");
-        assertEquals("", result, "Inputul gol ar trebui sa ramana gol.");
+    public void testCleanTextHandlesHeaders() {
+        String input = "# Titlu\n## Subtitlu";
+        String expected = "Titlu\nSubtitlu";
+        assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
     @Test
-    public void testRemovesMarkdownHeaders() {
-        String input = "# Titlu\n## Subtitlu\nText";
-        String expected = "Titlu\nSubtitlu\nText";
-        String result = DeepSeekChatApp.cleanTextForSpeech(input);
-        assertEquals(expected, result, "Titlurile Markdown nu au fost eliminate corect.");
+    public void testCleanTextHandlesBoldText() {
+        String input = "Acesta este **important**!";
+        String expected = "Acesta este important!";
+        assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
     @Test
-    public void testRemovesBoldMarkdown() {
-        String input = "Acesta este **important**.";
-        String expected = "Acesta este important.";
-        String result = DeepSeekChatApp.cleanTextForSpeech(input);
-        assertEquals(expected, result, "Textul bold Markdown nu a fost eliminat corect.");
+    public void testCleanTextTrimsWhitespace() {
+        String input = "   Text   ";
+        assertEquals("Text", DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
     @Test
-    public void testTrimsWhitespace() {
-        String input = "   Text cu spatii   ";
-        String expected = "Text cu spatii";
-        String result = DeepSeekChatApp.cleanTextForSpeech(input);
-        assertEquals(expected, result, "Spatiile in exces nu au fost eliminate corect.");
+    public void testCleanTextHandlesMultipleLines() {
+        String input = "  ## Titlu  \n**Bold**  ";
+        String expected = "Titlu\nBold";
+        assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
-    @Test
-    public void testCombinedMarkdownAndWhitespace() {
-        String input = "   ## Titlu   \n**Bold** text normal  ";
-        String expected = "Titlu\nBold text normal";
-        String result = DeepSeekChatApp.cleanTextForSpeech(input);
-        assertEquals(expected, result, "Curatarea combinata de Markdown si spatii a esuat.");
-    }
+    // === initChatService() ===
 
     @Test
-    public void testNoMarkdownNoTrimReturnsSameText() {
-        String input = "Text simplu fara Markdown.";
-        String result = DeepSeekChatApp.cleanTextForSpeech(input);
-        assertEquals(input, result, "Textul fara modificari ar trebui sa ramana neschimbat.");
+    public void testInitChatServiceReturnsInstance() {
+        ChatService chatService = DeepSeekChatApp.initChatService("fake-key");
+        assertNotNull(chatService);
+        assertTrue(chatService instanceof ChatService);
+    }
+
+    // === runInteractionLoop(): input text ===
+
+    @Test
+    public void testRunInteractionLoopWithTextInput() throws Exception {
+        String input = "1\nSalut\nexit\n";
+        Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+
+        ChatService chatMock = mock(ChatService.class);
+        when(chatMock.sendMessage("Salut")).thenReturn("Salutare!");
+
+        GoogleTTS ttsMock = mock(GoogleTTS.class);
+        SpeakToText sttMock = mock(SpeakToText.class);
+
+        DeepSeekChatApp.runInteractionLoop(scanner, chatMock, ttsMock, sttMock);
+
+        String output = consoleOutput.toString();
+        assertTrue(output.contains("AI: Salutare!"));
+        verify(ttsMock).speak("Salutare!");
+    }
+
+    // === runInteractionLoop(): input voice ===
+
+    @Test
+    public void testRunInteractionLoopWithVoiceInput() throws Exception {
+        String input = "2\nexit\n";
+        Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+
+        ChatService chatMock = mock(ChatService.class);
+        when(chatMock.sendMessage("intrebare vocala")).thenReturn("Raspuns vocal");
+
+        GoogleTTS ttsMock = mock(GoogleTTS.class);
+        SpeakToText sttMock = mock(SpeakToText.class);
+        when(sttMock.listen()).thenReturn("intrebare vocala").thenReturn("exit");
+
+        DeepSeekChatApp.runInteractionLoop(scanner, chatMock, ttsMock, sttMock);
+
+        String output = consoleOutput.toString();
+        assertTrue(output.contains("AI: Raspuns vocal"));
+        verify(ttsMock).speak("Raspuns vocal");
+    }
+
+    // === runInteractionLoop(): TTS throws exception ===
+
+    @Test
+    public void testRunInteractionLoopHandlesTtsException() throws Exception {
+        String input = "1\nSalut\nexit\n";
+        Scanner scanner = new Scanner(new ByteArrayInputStream(input.getBytes()));
+
+        ChatService chatMock = mock(ChatService.class);
+        when(chatMock.sendMessage("Salut")).thenReturn("Salut!");
+
+        GoogleTTS ttsMock = mock(GoogleTTS.class);
+        doThrow(new RuntimeException("TTS error")).when(ttsMock).speak(anyString());
+
+        SpeakToText sttMock = mock(SpeakToText.class);
+
+        DeepSeekChatApp.runInteractionLoop(scanner, chatMock, ttsMock, sttMock);
+
+        String output = consoleOutput.toString();
+
+        
+        if (!output.contains("Eroare la redarea vocii: TTS error")) {
+            System.out.println("---- OUTPUT COMPLET ----");
+            System.out.println(output);
+            fail("Mesajul de eroare TTS nu a fost detectat.");
+        }
+
+   
+        verify(ttsMock).speak(anyString());
     }
 }
+
