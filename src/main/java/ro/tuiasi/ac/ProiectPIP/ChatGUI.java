@@ -122,7 +122,7 @@ public class ChatGUI {
     }
 }
 */
-
+/*
 package ro.tuiasi.ac.ProiectPIP;
 
 import javax.swing.*;
@@ -315,3 +315,154 @@ public class ChatGUI {
         ));
     }
 }
+*/
+
+package ro.tuiasi.ac.ProiectPIP;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+
+public class ChatGUI extends JFrame {
+    private final ChatService chatService;
+    private final GoogleTTS tts;
+    private final SpeakToText stt;
+
+    private JTextArea conversationArea;
+    private JButton btnText;
+    private JButton btnVoice;
+    private JButton btnStop;
+
+    private volatile boolean runningInteraction = false;
+
+    public ChatGUI(ChatService chatService, GoogleTTS tts, SpeakToText stt) {
+        this.chatService = chatService;
+        this.tts = tts;
+        this.stt = stt;
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setTitle("DeepSeek Chat GUI");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+
+        conversationArea = new JTextArea();
+        conversationArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(conversationArea);
+
+        btnText = new JButton("Tasteaza");
+        btnVoice = new JButton("Vorbeste");
+        btnStop = new JButton("Opreste");
+
+        btnText.addActionListener(this::handleText);
+        btnVoice.addActionListener(this::handleVoice);
+        btnStop.addActionListener(e -> handleStop());
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(btnText);
+        buttonPanel.add(btnVoice);
+        buttonPanel.add(btnStop);
+
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+        setVisible(true);
+    }
+
+    private void handleText(ActionEvent e) {
+        if (runningInteraction) return;
+        runningInteraction = true;
+
+        new Thread(() -> {
+            while (runningInteraction) {
+                String input = getUserTextInput();
+                if (input == null || input.trim().isEmpty()) continue;
+                if (input.equalsIgnoreCase("exit")) break;
+
+                String response = chatService.sendMessage(input);
+                appendToConversation("Tu: " + input);
+                appendToConversation("AI: " + response);
+
+                try {
+                    String cleaned = DeepSeekChatApp.cleanTextForSpeech(response);
+                    tts.speak(cleaned);
+                } catch (Exception ex) {
+                    appendToConversation("Eroare la redare: " + ex.getMessage());
+                }
+            }
+            runningInteraction = false;
+            setInputButtonsEnabled(true);
+        }).start();
+
+        setInputButtonsEnabled(false);
+    }
+
+    private void handleVoice(ActionEvent e) {
+        if (runningInteraction) return;
+        runningInteraction = true;
+
+        new Thread(() -> {
+            while (runningInteraction) {
+                String input = stt.listen();
+                if (input == null || input.trim().isEmpty()) continue;
+                if (input.equalsIgnoreCase("exit")) break;
+
+                String response = chatService.sendMessage(input);
+                appendToConversation("Tu (voce): " + input);
+                appendToConversation("AI: " + response);
+
+                try {
+                    String cleaned = DeepSeekChatApp.cleanTextForSpeech(response);
+                    tts.speak(cleaned);
+                } catch (Exception ex) {
+                    appendToConversation("Eroare la redare: " + ex.getMessage());
+                }
+            }
+            runningInteraction = false;
+            setInputButtonsEnabled(true);
+        }).start();
+
+        setInputButtonsEnabled(false);
+    }
+
+    private void handleStop() {
+        runningInteraction = false;
+        tts.stop();
+    }
+
+    private void setInputButtonsEnabled(boolean enabled) {
+        btnText.setEnabled(enabled);
+        btnVoice.setEnabled(enabled);
+    }
+
+    private void appendToConversation(String message) {
+        SwingUtilities.invokeLater(() -> {
+            conversationArea.append(message + "\n");
+            conversationArea.setCaretPosition(conversationArea.getDocument().getLength());
+        });
+    }
+
+
+    public JButton getTextButton() {
+        return btnText;
+    }
+
+    public JButton getStopButton() {
+        return btnStop;
+    }
+
+    public JButton getVoiceButton() {
+        return btnVoice;
+    }
+
+    public JTextArea getConversationArea() {
+        return conversationArea;
+    }
+
+    protected String getUserTextInput() {
+        return JOptionPane.showInputDialog(this, "Scrie intrebarea (sau 'exit'):");
+    }
+}
+

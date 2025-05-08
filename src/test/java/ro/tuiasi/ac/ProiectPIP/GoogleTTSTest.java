@@ -39,7 +39,7 @@ public class GoogleTTSTest {
         String result = tts.cleanText(input);
         assertEquals("Text simplu", result);
     }
-    
+        
     @Test
     public void testSpeakDoesNotThrowException() {
         GoogleTTS tts = new GoogleTTS();
