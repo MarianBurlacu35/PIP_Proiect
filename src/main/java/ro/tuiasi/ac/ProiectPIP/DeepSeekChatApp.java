@@ -200,10 +200,22 @@ public class DeepSeekChatApp {
 
     public static String cleanTextForSpeech(String text) {
         if (text == null) return "";
-        text = text.replaceAll("(?m)^\\s*#+\\s*", "");        
-        text = text.replaceAll("\\*\\*(.*?)\\*\\*", "$1");    
-        return text.trim();
+
+       
+        text = text.replaceAll("(?m)^\\s*#+\\s*", "");
+   
+        text = text.replaceAll("\\*\\*(.*?)\\*\\*", "$1");
+
+       
+        String[] lines = text.split("\\r?\\n");
+        StringBuilder cleaned = new StringBuilder();
+        for (String line : lines) {
+            cleaned.append(line.trim()).append("\n");
+        }
+
+        return cleaned.toString().trim(); 
     }
+
 }
 
 
