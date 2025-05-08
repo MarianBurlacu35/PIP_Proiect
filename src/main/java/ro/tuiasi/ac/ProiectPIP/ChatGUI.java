@@ -399,6 +399,8 @@ public class ChatGUI extends JFrame {
         setInputButtonsEnabled(false);
     }
 
+
+
     private void handleVoice(ActionEvent e) {
         if (runningInteraction) return;
         runningInteraction = true;
@@ -464,5 +466,6 @@ public class ChatGUI extends JFrame {
     protected String getUserTextInput() {
         return JOptionPane.showInputDialog(this, "Scrie intrebarea (sau 'exit'):");
     }
+    
 }
 
