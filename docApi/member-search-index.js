@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"ro.tuiasi.ac.ProiectPIP","c":"ApiClient","l":"ApiClient()","u":"%3Cinit%3E()"},{"p":"ro.tuiasi.ac.ProiectPIP","c":"ApiClient","l":"getClient()"},{"p":"ro.tuiasi.ac.ProiectPIP","c":"ApiClient","l":"oldClient()"}];updateSearchResults();

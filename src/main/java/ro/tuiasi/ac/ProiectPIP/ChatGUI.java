@@ -474,7 +474,12 @@ package ro.tuiasi.ac.ProiectPIP;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-
+/**
+ * 
+ * @author Marian-Cosmin Burlacu
+ * 
+ *
+ */
 public class ChatGUI extends JFrame {
     private final ChatService chatService;
     private final GoogleTTS tts;
