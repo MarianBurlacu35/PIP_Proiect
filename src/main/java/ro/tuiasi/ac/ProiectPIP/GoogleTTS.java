@@ -231,14 +231,26 @@ public class GoogleTTS {
         }
     }
 
-    public void stop() {
-        if (currentLine != null && currentLine.isRunning()) {
-            currentLine.stop();
-            currentLine.flush();
-            currentLine.close();
-            System.out.println("Redarea vocala a fost oprita de utilizator.");
+    public synchronized void stop() {
+        try {
+            if (currentLine != null) {
+                if (currentLine.isRunning()) {
+                    currentLine.stop();
+                }
+                currentLine.flush();
+                currentLine.close();
+                System.out.println("Redarea vocala a fost oprita de utilizator.");
+            } else {
+                System.out.println("Redarea era deja oprita sau nu fusese pornita.");
+            }
+        } catch (Exception e) {
+            System.err.println("Eroare la oprirea redarii: " + e.getMessage());
+        } finally {
+            currentLine = null;
         }
     }
+
+
 
     protected String cleanText(String text) {
         if (text == null) return "";
