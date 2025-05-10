@@ -284,8 +284,8 @@ import java.io.*;
  * tts.speak("Salut, cum pot sa te ajut?");
  * }</pre>
  *
- * @author Marian
- * @version 1.0
+ * @author Rares-Daniel Constantin
+ * @version 10.05.2025
  * @see com.google.cloud.texttospeech.v1.TextToSpeechClient
  * @see javax.sound.sampled.SourceDataLine
  */
