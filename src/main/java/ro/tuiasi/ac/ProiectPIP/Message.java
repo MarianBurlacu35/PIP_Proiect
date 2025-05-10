@@ -14,7 +14,7 @@ package ro.tuiasi.ac.ProiectPIP;
  * }</pre>
  *
  * @author Rares-Daniel Constantin
- * @version 1.0
+ * @version 10.05.2025
  * @see ChatService
  */
 public class Message {
