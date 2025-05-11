@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"ro.tuiasi.ac.ProiectPIP","l":"Message"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"ro.tuiasi.ac.ProiectPIP","l":"DeepSeekChatApp"}];updateSearchResults();
