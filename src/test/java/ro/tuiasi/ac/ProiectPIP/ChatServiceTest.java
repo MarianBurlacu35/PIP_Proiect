@@ -1,8 +1,15 @@
+
+/**
+ * Clasa de teste unitare pentru {@link ChatService}, care verifica raspunsurile
+ * primite de la un server HTTP simulat folosind {@code MockWebServer}.
+ * Aceste teste acopera raspunsuri valide, coduri de eroare si exceptii.
+ *
+ * @author Marian-Cosmin Burlacu
+ * @version 12.05.2025
+ * @see ChatService
+ */
 package ro.tuiasi.ac.ProiectPIP;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -17,35 +24,65 @@ public class ChatServiceTest {
 
     private MockWebServer mockServer;
 
+    /**
+     * Initializeaza serverul HTTP simulat inainte de fiecare test.
+     *
+     * @throws IOException daca serverul nu poate fi pornit
+     */
     @BeforeEach
     public void setup() throws IOException {
         mockServer = new MockWebServer();
         mockServer.start();
     }
 
+    /**
+     * Opreste serverul HTTP simulat dupa fiecare test.
+     *
+     * @throws IOException daca serverul nu poate fi oprit
+     */
     @AfterEach
     public void tearDown() throws IOException {
         mockServer.shutdown();
     }
 
-    
+    /**
+     * Subclasa de test care permite specificarea unei adrese URL personalizate pentru API.
+     *
+     * @see ChatService
+     */
     public static class TestableChatService extends ChatService {
         private final String url;
 
+        /**
+         * Constructor care seteaza cheia API si URL-ul de baza.
+         *
+         * @param apiKey cheia API folosita la autentificare
+         * @param baseUrl adresa URL personalizata pentru testare
+         */
         public TestableChatService(String apiKey, String baseUrl) {
             super(apiKey);
             this.url = baseUrl;
         }
 
+        /**
+         * Suprascrie metoda pentru a returna URL-ul personalizat.
+         *
+         * @return URL-ul catre care se trimite cererea
+         */
         @Override
         protected String getApiUrl() {
             return url;
         }
     }
 
+    /**
+     * Testeaza daca metoda {@link ChatService#sendMessage(String)} returneaza un raspuns valid
+     * cand serverul trimite un JSON corespunzator.
+     *
+     * @see ChatService#sendMessage(String)
+     */
     @Test
     public void testSendMessageReturnsValidResponse() {
-        
         String jsonResponse = """
             {
               "choices": [{
@@ -73,6 +110,11 @@ public class ChatServiceTest {
         assertEquals("Salut! Cu ce te pot ajuta?", result);
     }
 
+    /**
+     * Testeaza daca metoda {@link ChatService#sendMessage(String)} gestioneaza corect un cod de eroare HTTP (ex. 401).
+     *
+     * @see ChatService#sendMessage(String)
+     */
     @Test
     public void testSendMessageHandlesErrorCode() {
         mockServer.enqueue(new MockResponse()
@@ -90,9 +132,15 @@ public class ChatServiceTest {
         assertTrue(result.contains("Eroare API: 401"));
     }
 
+    /**
+     * Testeaza daca metoda {@link ChatService#sendMessage(String)} gestioneaza exceptiile, cum ar fi cand serverul e oprit.
+     *
+     * @throws IOException daca serverul nu poate fi inchis
+     * @see ChatService#sendMessage(String)
+     */
     @Test
     public void testSendMessageHandlesException() throws IOException {
-        mockServer.shutdown(); 
+        mockServer.shutdown(); // Simulam o exceptie
 
         ChatService chatService = new ChatService("fake-key") {
             @Override

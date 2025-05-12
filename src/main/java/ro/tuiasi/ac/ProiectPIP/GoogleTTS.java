@@ -2,10 +2,8 @@
 package ro.tuiasi.ac.ProiectPIP;
 
 import com.google.cloud.texttospeech.v1.*;
-import com.google.protobuf.ByteString;
 
 import javax.sound.sampled.*;
-import java.io.*;
 
 /**
  * {@code GoogleTTS} este responsabil pentru sintetizarea textului in voce

@@ -18,15 +18,16 @@ import java.awt.event.ActionEvent;
  * </ul>
  * </p>
  *
- * @author Marian
- * @version 1.0
+ * @author Marian-Cosmin Burlacu
+ * @version 12.05.2025
  * @see ChatService
  * @see GoogleTTS
  * @see SpeakToText
  */
 public class ChatGUI extends JFrame {
 
-    private final ChatService chatService;
+	private static final long serialVersionUID = 1L;
+	private final ChatService chatService;
     private final GoogleTTS tts;
     private final SpeakToText stt;
 

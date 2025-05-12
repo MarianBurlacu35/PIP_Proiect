@@ -1,3 +1,13 @@
+
+/**
+ * Clasa de teste unitare pentru {@link DeepSeekChatApp}.
+ * Verifica corectitudinea functionalitatilor de curatare a textului,
+ * initializare a serviciului de chat si bucla de interactiune cu utilizatorul.
+ *
+ * @author Marian-Cosmin Burlacu
+ * @version 12.05.2025
+ * @see DeepSeekChatApp
+ */
 package ro.tuiasi.ac.ProiectPIP;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,27 +26,43 @@ public class DeepSeekChatAppTest {
     private final PrintStream originalErr = System.err;
     private ByteArrayOutputStream consoleOutput;
 
+    /**
+     * Redirectioneaza iesirea in consola pentru capturarea rezultatelor testelor.
+     */
     @BeforeEach
     public void setupConsoleCapture() {
         consoleOutput = new ByteArrayOutputStream();
         PrintStream combinedStream = new PrintStream(consoleOutput);
         System.setOut(combinedStream);
-        System.setErr(combinedStream); 
+        System.setErr(combinedStream);
     }
 
+    /**
+     * Restaureaza iesirea standard in consola dupa fiecare test.
+     */
     @AfterEach
     public void restoreConsole() {
         System.setOut(originalOut);
         System.setErr(originalErr);
     }
 
+    // ============================
     // === cleanTextForSpeech() ===
+    // ============================
 
+    /**
+     * Testeaza daca metoda {@code cleanTextForSpeech} returneaza sirul gol cand primeste {@code null}.
+     *
+     * @see DeepSeekChatApp#cleanTextForSpeech(String)
+     */
     @Test
     public void testCleanTextHandlesNull() {
         assertEquals("", DeepSeekChatApp.cleanTextForSpeech(null));
     }
 
+    /**
+     * Testeaza eliminarea anteturilor markdown (#, ##) din text.
+     */
     @Test
     public void testCleanTextHandlesHeaders() {
         String input = "# Titlu\n## Subtitlu";
@@ -44,6 +70,9 @@ public class DeepSeekChatAppTest {
         assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
+    /**
+     * Testeaza eliminarea formatarii **bold** din text.
+     */
     @Test
     public void testCleanTextHandlesBoldText() {
         String input = "Acesta este **important**!";
@@ -51,12 +80,18 @@ public class DeepSeekChatAppTest {
         assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
+    /**
+     * Testeaza eliminarea spatiilor albe de la inceput si sfarsit.
+     */
     @Test
     public void testCleanTextTrimsWhitespace() {
         String input = "   Text   ";
         assertEquals("Text", DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
+    /**
+     * Testeaza curatarea textului pe mai multe linii cu markdown.
+     */
     @Test
     public void testCleanTextHandlesMultipleLines() {
         String input = "  ## Titlu  \n**Bold**  ";
@@ -64,8 +99,16 @@ public class DeepSeekChatAppTest {
         assertEquals(expected, DeepSeekChatApp.cleanTextForSpeech(input));
     }
 
+    // ============================
     // === initChatService() ===
+    // ============================
 
+    /**
+     * Testeaza daca metoda {@code initChatService} returneaza o instanta valida.
+     *
+     * @see DeepSeekChatApp#initChatService(String)
+     * @return o instanta de tip {@link ChatService}
+     */
     @Test
     public void testInitChatServiceReturnsInstance() {
         ChatService chatService = DeepSeekChatApp.initChatService("fake-key");
@@ -73,8 +116,16 @@ public class DeepSeekChatAppTest {
         assertTrue(chatService instanceof ChatService);
     }
 
-    // === runInteractionLoop(): input text ===
+    // =======================================
+    // === runInteractionLoop(): text input ===
+    // =======================================
 
+    /**
+     * Testeaza bucla de interactiune pentru cazul in care utilizatorul alege input text.
+     *
+     * @throws Exception in caz de eroare la simularea interactiunii
+     * @see DeepSeekChatApp#runInteractionLoop(Scanner, ChatService, GoogleTTS, SpeakToText)
+     */
     @Test
     public void testRunInteractionLoopWithTextInput() throws Exception {
         String input = "1\nSalut\nexit\n";
@@ -93,8 +144,15 @@ public class DeepSeekChatAppTest {
         verify(ttsMock).speak("Salutare!");
     }
 
-    // === runInteractionLoop(): input voice ===
+    // =======================================
+    // === runInteractionLoop(): voice input ===
+    // =======================================
 
+    /**
+     * Testeaza bucla de interactiune pentru cazul in care utilizatorul alege input vocal.
+     *
+     * @throws Exception daca interactiunea esueaza
+     */
     @Test
     public void testRunInteractionLoopWithVoiceInput() throws Exception {
         String input = "2\nexit\n";
@@ -114,8 +172,16 @@ public class DeepSeekChatAppTest {
         verify(ttsMock).speak("Raspuns vocal");
     }
 
+    // ================================================
     // === runInteractionLoop(): TTS throws exception ===
+    // ================================================
 
+    /**
+     * Testeaza daca aplicatia gestioneaza exceptiile aruncate de TTS.
+     *
+     * @throws Exception daca apar probleme la executia testului
+     * @see GoogleTTS#speak(String)
+     */
     @Test
     public void testRunInteractionLoopHandlesTtsException() throws Exception {
         String input = "1\nSalut\nexit\n";
@@ -133,15 +199,12 @@ public class DeepSeekChatAppTest {
 
         String output = consoleOutput.toString();
 
-        
         if (!output.contains("Eroare la redarea vocii: TTS error")) {
             System.out.println("---- OUTPUT COMPLET ----");
             System.out.println(output);
             fail("Mesajul de eroare TTS nu a fost detectat.");
         }
 
-   
         verify(ttsMock).speak(anyString());
     }
 }
-
